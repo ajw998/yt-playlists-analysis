@@ -88,22 +88,16 @@ OTHERS_PLAYLIST = (
     'PLC3y8-rFHvwgg3vaYJgHGnModB54rxOk3',  # Codevolution - Introduction to React
 )
 
-# list_of_playlists = SKIENNA_PLAYLISTS + MIT_PLAYLISTS + \
-#                     THREE_BLUE_ONE_BROWN_PLAYLIST + HARVARD_UNIVERSITY_PLAYLIST + \
-#                     COURSEA_PLAYLIST + KHAN_ACADEMY_PLAYLIST + \
-#                     FREECODECAMP_PLAYLIST + OTHERS_PLAYLIST
-
-list_of_playlists = MIT_PLAYLISTS
+list_of_playlists = SKIENNA_PLAYLISTS + MIT_PLAYLISTS + \
+                    THREE_BLUE_ONE_BROWN_PLAYLIST + HARVARD_UNIVERSITY_PLAYLIST + \
+                    COURSEA_PLAYLIST + KHAN_ACADEMY_PLAYLIST + \
+                    FREECODECAMP_PLAYLIST + OTHERS_PLAYLIST
 
 # Check if value exists in list
-
-
 def exists_p(id, plist):
     return id in plist
 
 # Percentage change
-
-
 def pct_change(old, new):
     if (int(new) - int(old)) is not 0:
         return float(((int(new) - int(old)) * 100)/int(old))
@@ -111,14 +105,11 @@ def pct_change(old, new):
         return 0
 
 # Extract video ids from playlists data
-
-
 def extract_video_id(data):
     return tuple(i['snippet']['resourceId']['videoId'] for i in data)
 
 # Fetch
 # Recursively fetch playlist item and returns a concatenated list of all video ids inside a playlist
-
 
 def get_playlist_items(service, playlist_id, npt=''):
     res = service.playlistItems().list(
@@ -134,19 +125,6 @@ def get_playlist_items(service, playlist_id, npt=''):
 
     return res['items']
 
-# Get playlist metadata
-
-
-def get_playlist_details(service, playlist_id):
-    res = service.playlists().list(
-        part="snippet,contentDetails",
-        fields="items(snippet(channelId, title, channelTitle, description), contentDetails)",
-        id=playlist_id,
-        maxResults=MAX_RESULTS
-    ).execute()
-    return res
-
-
 def get_video_data(service, video_id, parts='snippet', fields='items(snippet)'):
     res = service.videos().list(
         part="snippet,statistics,contentDetails",
@@ -156,15 +134,20 @@ def get_video_data(service, video_id, parts='snippet', fields='items(snippet)'):
     ).execute()
     return res
 
+# Get playlist metadata
+def get_playlist_details(service, playlist_id):
+    res = service.playlists().list(
+        part="snippet,contentDetails",
+        fields="items(snippet(channelId, title, channelTitle, description), contentDetails)",
+        id=playlist_id,
+        maxResults=MAX_RESULTS
+    ).execute()
+    return res
 
 def get_playlist_metadata(service, connection, playlist_id):
-    current_playlists = pd.read_sql_query(
-        'SELECT id FROM Playlist', connection)['id'].tolist()
-    playlist_details = get_playlist_details(playlist_id)['items'][0]
-
+    playlist_details = get_playlist_details(service, playlist_id)['items'][0]
     connection.cursor().execute(
         f'INSERT INTO Playlist (id, title, description, channelTitle, itemCount) VALUES ("{playlist_id}", "{playlist_details["snippet"]["title"]}", "{playlist_details["snippet"]["description"]}", "{playlist_details["snippet"]["channelTitle"]}", "{playlist_details["contentDetails"]["itemCount"]}")')
-
 
 def get_playlist_videos_data(service, connection, playlist_id):
     playlist = get_playlist_items(service, playlist_id)
@@ -203,12 +186,9 @@ if __name__ == '__main':
         'SELECT id FROM Video', connection)['id'].tolist()
     g_service = build(SERVICE_NAME, VERSION, developerKey=DEVELOPER_KEY)
 
-    # Update playlist metadata
-    for i in range(len(list_of_playlists)):
-        if exists_p(list_of_playlists[i], current_playlists):
-            continue
-        else:
-            get_playlist_metadata(g_service, connection, list_of_playlists[i])
+    for i in set(list_of_playlists).difference(set(current_playlists)):
+        if i is not None:
+            get_playlist_metadata(g_service, connection, i)
 
     for i in range(len(list_of_playlists)):
         get_playlist_videos_data(g_service, connection, list_of_playlists[i])
