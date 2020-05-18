@@ -168,7 +168,7 @@ def get_playlist_videos_data(service, connection, playlist_id):
                 connection.commit()
             else:
                 print(
-                    f'Video ${playlist_videos[i]} has no significant movement. Moving on to next video…')
+                    f'Video {playlist_videos[i]} has no significant movement. Moving on to next video…')
         else:
             print('New record found! Inserting new record…')
             data = get_video_data(service, playlist_videos[i], 'snippet,statistics,contentDetails',
