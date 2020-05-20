@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from datetime import datetime
 import sqlite3
 import pandas as pd
+from playlists import PLAYLISTS
 load_dotenv(verbose=True)
 
 # Defining the fetch functions
@@ -28,70 +29,6 @@ VERSION = "v3"
 MAX_RESULTS = 50
 
 DB = 'data/ytdata.db'
-
-# Interested Playlists
-SKIENNA_PLAYLISTS = (
-    'PLOtl7M3yp-DX32N0fVIyvn7ipWKNGmwpp',  # Analysis of Algorithms 2016
-    'PLOtl7M3yp-DVBdLYatrltDJr56AKZ1qXo',  # Data Science - Fall 2016
-)
-
-MIT_PLAYLISTS = (
-    'PLE18841CABEA24090',  # Structure and Interpretation
-    'PLE7DDD91010BC51F8',  # Linear Algebra
-    'PLUl4u3cNGP61Oq3tWYp6V_F-5jb5L2iHb',  # Introduction to Algorithms
-    # Introduction to Computer Science and Programming - Fall 2016
-    'PLUl4u3cNGP63WbdFxL8giv4yhgdMGaZNA',
-    # Learn to Build your own video game with the Unity Game Engine and MS Kinect
-    'PLUl4u3cNGP60ZaGv5SgpIk67YnH1WqCLI',
-    'PLF83B8D8C87426E44',  # Fundamentals of Biology
-    # Introduction to Computational Thinking and Data Science
-    'PLUl4u3cNGP619EG1wp0kT-7rDE_Az5TNd',
-    'PLUl4u3cNGP61-9PEhRognw5vryrSEVLPr',  # Quantum Physics I, 2013
-    # Introduction to Computer Science and Programming - Fall 2008 (most popular)
-    'PL4C4720A6F225E074',
-    # MIT 18.S096 Topics in Mathematics w Applications in Finance
-    'PLUl4u3cNGP63ctJIEC1UnZ0btsphnnoHR',
-)
-
-THREE_BLUE_ONE_BROWN_PLAYLIST = (
-    'PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab',  # Essence of Linear Algebra
-    'PLZHQObOWTQDMsr9K-rj53DwVRMYO3t5Yr',  # Essence of Calculus
-    'PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi',  # Neural networks
-    'PLZHQObOWTQDNPOjrT6KVlfJuKtYTftqH6',  # Differential Equations
-)
-
-HARVARD_UNIVERSITY_PLAYLIST = (
-    'PL2SOU6wwxB0v1kQTpqpuu5kEJo2i-iUyf',  # Algorithms for Big Data
-    # Advanced Algorithms (COMPSCI 224) (popular)
-    'PL2SOU6wwxB0uP4rJgf5ayhHWgw7akUWSf',
-)
-
-COURSEA_PLAYLIST = (
-    # GCP Fundamentals - Google Cloud Platform Fundamentals: Core Infrastructure
-    'PLVext98k2evjIFqVggHfvecnFu4tTJK_o',
-    # R Programming - Introduction to R by Johns Hopkins University
-    'PLVext98k2evi8mDNRo4MwIgVgSmwM3cS8',
-)
-
-KHAN_ACADEMY_PLAYLIST = (
-    'PLSQl0a2vh4HA50QhFIirlEZRXG4yjcoGM',  # Journey into cryptography
-)
-
-FREECODECAMP_PLAYLIST = (
-    # Introduction to Computer Science, Harvard's CS50
-    'PLWKjhJtqVAbmGw5fN5BQlwuug-8bDmabi',
-    'PLWKjhJtqVAbluXJKKbCIb4xd7fcRkpzoz',  # Introduction to Game Development
-)
-
-OTHERS_PLAYLIST = (
-    'PL6cactdCCnTLkQah9GKzsJmiLbegy4dEk',  # Udemy Ultimate Web Development Tutorial
-    'PLC3y8-rFHvwgg3vaYJgHGnModB54rxOk3',  # Codevolution - Introduction to React
-)
-
-list_of_playlists = SKIENNA_PLAYLISTS + MIT_PLAYLISTS + \
-                    THREE_BLUE_ONE_BROWN_PLAYLIST + HARVARD_UNIVERSITY_PLAYLIST + \
-                    COURSEA_PLAYLIST + KHAN_ACADEMY_PLAYLIST + \
-                    FREECODECAMP_PLAYLIST + OTHERS_PLAYLIST
 
 # Check if value exists in list
 def exists_p(id, plist):
@@ -186,9 +123,9 @@ if __name__ == '__main':
         'SELECT id FROM Video', connection)['id'].tolist()
     g_service = build(SERVICE_NAME, VERSION, developerKey=DEVELOPER_KEY)
 
-    for i in set(list_of_playlists).difference(set(current_playlists)):
+    for i in set(PLAYLISTS).difference(set(current_playlists)):
         if i is not None:
             get_playlist_metadata(g_service, connection, i)
 
-    for i in range(len(list_of_playlists)):
-        get_playlist_videos_data(g_service, connection, list_of_playlists[i])
+    for i in range(len(PLAYLISTS)):
+        get_playlist_videos_data(g_service, connection, PLAYLISTS[i])
